@@ -21,6 +21,7 @@ import django
 from django.db import models
 from django.utils.text import capfirst
 from django.core import exceptions
+from django.utils.encoding import force_text
 
 from ..forms.fields import MultiSelectFormField, MaxChoicesValidator
 from ..utils import get_max_length
@@ -60,24 +61,31 @@ class MultiSelectField(models.CharField):
     def get_choices_default(self):
         return self.get_choices(include_blank=False)
 
-    def get_choices_selected(self, arr_choices):
-        choices_selected = []
-        for choice_selected in arr_choices:
-            choices_selected.append(string_type(choice_selected[0]))
-        return choices_selected
-
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
         return self.get_prep_value(value)
 
     def validate(self, value, model_instance):
-        arr_choices = self.get_choices_selected(self.get_choices_default())
         for opt_select in value:
-            if (opt_select not in arr_choices):
+            if not self.valid_value(opt_select):
                 if django.VERSION[0] >= 1 and django.VERSION[1] >= 6:
                     raise exceptions.ValidationError(self.error_messages['invalid_choice'] % {"value": value})
                 else:
                     raise exceptions.ValidationError(self.error_messages['invalid_choice'] % value)
+
+    def valid_value(self, value):
+        "Check to see if the provided value is a valid choice"
+        text_value = force_text(value)
+        for k, v in self.get_choices_default():
+            if isinstance(v, (list, tuple)):
+                # This is an optgroup, so look inside the group for options
+                for k2, v2 in v:
+                    if value == k2 or text_value == force_text(k2):
+                        return True
+            else:
+                if value == k or text_value == force_text(k):
+                    return True
+        return False
 
     def get_default(self):
         default = super(MultiSelectField, self).get_default()

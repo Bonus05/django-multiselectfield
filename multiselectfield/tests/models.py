@@ -1,8 +1,19 @@
 from django.db import models
+from multiselectfield.db import fields
 
 
-class TestModelWithOptGroupField(models.Model):
+class TestModel(models.Model):
     CHOICES = (
+        (1, 'First'),
+        (2, 'Second'),
+        (3, 'Third'),
+        (4, 'Fourth')
+    )
+    multivaluefield = fields.MultiSelectField(choices=CHOICES)
+
+
+class TestModelWithOptgroup(models.Model):
+    OPTGROUP_CHOICES = (
         ('Opt Group 1', (
             (1, 'First'),
             (2, 'Second'),
@@ -13,4 +24,4 @@ class TestModelWithOptGroupField(models.Model):
         (4, 'Fourth')
     )
 
-    optgroup_field = models.CharField(choices=CHOICES, max_length=255)
+    optgroup_multivaluefield = fields.MultiSelectField(choices=OPTGROUP_CHOICES)
