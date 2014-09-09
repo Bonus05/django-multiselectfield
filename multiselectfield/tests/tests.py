@@ -5,6 +5,7 @@ from models import TestValueTypeModel
 from django.forms.models import modelform_factory
 
 class MultiSelectFieldTest(TestCase):
+    fixtures = ['fixtures.json']
 
     def test_single_select_on_db_field(self):
         TestModelForm = modelform_factory(TestModel)
@@ -27,6 +28,9 @@ class MultiSelectFieldTest(TestCase):
         form = TestValueTypeModelForm({"value_type_multivaluefield": [1,2]}, instance=model)
         self.assertTrue(form.is_valid(), msg=MultiSelectFieldTest.pretty_field_errors(form))
         self.assertEquals(model.value_type_multivaluefield, [1,2])
+
+    def test_load_fixture_multivaluefield_with_value_type(self):
+        self.assertEquals(TestValueTypeModel.objects.count(), 1)
 
     @staticmethod
     def pretty_field_errors(form):
