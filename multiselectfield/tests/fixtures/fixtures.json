@@ -5,5 +5,13 @@
         },
         "model": "tests.testvaluetypemodel",
         "pk": 1
+    },
+    {
+        "fields": {
+            "multivaluefield": "['1','2']",
+            "empty_multivaluefield": ""
+        },
+        "model": "tests.testmodel",
+        "pk": 1
     }
 ]

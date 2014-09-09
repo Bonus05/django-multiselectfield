@@ -10,6 +10,7 @@ class TestModel(models.Model):
         (4, 'Fourth')
     )
     multivaluefield = fields.MultiSelectField(choices=CHOICES)
+    empty_multivaluefield = fields.MultiSelectField(choices=CHOICES, blank=True, null=True)
 
 
 class TestModelWithOptgroup(models.Model):
