@@ -113,7 +113,7 @@ class MultiSelectField(models.CharField):
 
     def to_python(self, value):
         if value is None:
-            return None
+            return []  # FIXME: Needed for company, workaround
         elif not value:
             return []
         else:

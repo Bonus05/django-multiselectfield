@@ -45,7 +45,7 @@ class MultiSelectFieldTest(TestCase):
         model = TestModel.objects.first()
         self.assertEquals(model.multivaluefield, [u"1", u"2"])
         self.assertEquals(model.blank_multivaluefield, [])
-        self.assertEquals(model.null_multivaluefield, None)
+        self.assertEquals(model.null_multivaluefield, [])
 
     def test_save_multivaluefield_with_empty_and_null(self):
         model = TestModel()
@@ -53,7 +53,7 @@ class MultiSelectFieldTest(TestCase):
         model.save()
         self.assertEquals(model.multivaluefield, [u"1"])
         self.assertEquals(model.blank_multivaluefield, [])
-        self.assertEquals(model.null_multivaluefield, None)
+        self.assertEquals(model.null_multivaluefield, [])
 
     @staticmethod
     def pretty_field_errors(form):
