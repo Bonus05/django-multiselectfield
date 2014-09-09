@@ -25,3 +25,13 @@ class TestModelWithOptgroup(models.Model):
     )
 
     optgroup_multivaluefield = fields.MultiSelectField(choices=OPTGROUP_CHOICES)
+
+
+class TestValueTypeModel(models.Model):
+    CHOICES = (
+        (1, 'First'),
+        (2, 'Second'),
+        (3, 'Third'),
+        (4, 'Fourth')
+    )
+    value_type_multivaluefield = fields.MultiSelectField(choices=CHOICES, value_type=int)

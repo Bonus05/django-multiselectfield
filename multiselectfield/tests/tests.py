@@ -1,8 +1,8 @@
 from django.test import TestCase
 from models import TestModelWithOptgroup
 from models import TestModel
+from models import TestValueTypeModel
 from django.forms.models import modelform_factory
-import json
 
 class MultiSelectFieldTest(TestCase):
 
@@ -19,6 +19,14 @@ class MultiSelectFieldTest(TestCase):
         model = TestModelWithOptgroup()
         form = TestOptGroupModelForm({"optgroup_multivaluefield": [u'2',u'1']}, instance=model)
         self.assertTrue(form.is_valid(), msg=MultiSelectFieldTest.pretty_field_errors(form))
+
+    def test_single_select_on_db_field_with_value_type(self):
+        TestValueTypeModelForm = modelform_factory(TestValueTypeModel)
+        form = TestValueTypeModelForm()
+        model = TestValueTypeModel()
+        form = TestValueTypeModelForm({"value_type_multivaluefield": [1,2]}, instance=model)
+        self.assertTrue(form.is_valid(), msg=MultiSelectFieldTest.pretty_field_errors(form))
+        self.assertEquals(model.value_type_multivaluefield, [1,2])
 
     @staticmethod
     def pretty_field_errors(form):

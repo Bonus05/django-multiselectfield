@@ -20,7 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class MaxValueMultiFieldValidator(validators.MaxLengthValidator):
-    clean = lambda self, x: len(','.join(x))
+    clean = lambda self, x: len(','.join(map(str, x)))
     code = 'max_multifield_value'
 
 

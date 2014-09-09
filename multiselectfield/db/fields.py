@@ -52,6 +52,7 @@ class MultiSelectField(models.CharField):
 
     def __init__(self, *args, **kwargs):
         self.max_choices = kwargs.pop('max_choices', None)
+        self.value_type = kwargs.pop('value_type', None)
         super(MultiSelectField, self).__init__(*args, **kwargs)
         self.max_length = get_max_length(self.choices, self.max_length)
         self.validators[0] = MaxValueMultiFieldValidator(self.max_length)
@@ -109,9 +110,14 @@ class MultiSelectField(models.CharField):
         return ",".join(value)
 
     def to_python(self, value):
+        if not value:
+            return None
         if value is not None:
-            return value if isinstance(value, list) else value.split(',')
-        return ''
+            value_list = value if isinstance(value, list) else value.split(',')
+            if self.value_type is not None:
+                value_list = map(self.value_type, value_list)
+            return value_list
+        return None
 
     def contribute_to_class(self, cls, name):
         super(MultiSelectField, self).contribute_to_class(cls, name)
