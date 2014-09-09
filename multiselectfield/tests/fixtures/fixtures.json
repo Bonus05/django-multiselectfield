@@ -8,8 +8,9 @@
     },
     {
         "fields": {
-            "multivaluefield": "['1','2']",
-            "empty_multivaluefield": ""
+            "multivaluefield": "1,2",
+            "blank_multivaluefield": "",
+            "null_multivaluefield": null
         },
         "model": "tests.testmodel",
         "pk": 1
