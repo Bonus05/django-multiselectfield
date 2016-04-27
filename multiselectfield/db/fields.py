@@ -21,6 +21,7 @@ import django
 from django.db import models
 from django.utils.text import capfirst
 from django.core import exceptions
+from django.utils.encoding import force_text
 
 from ..forms.fields import MultiSelectFormField, MaxChoicesValidator
 from ..utils import get_max_length
@@ -51,6 +52,7 @@ class MultiSelectField(models.CharField):
 
     def __init__(self, *args, **kwargs):
         self.max_choices = kwargs.pop('max_choices', None)
+        self.value_type = kwargs.pop('value_type', None)
         super(MultiSelectField, self).__init__(*args, **kwargs)
         self.max_length = get_max_length(self.choices, self.max_length)
         self.validators[0] = MaxValueMultiFieldValidator(self.max_length)
@@ -64,24 +66,31 @@ class MultiSelectField(models.CharField):
     def get_choices_default(self):
         return self.get_choices(include_blank=False)
 
-    def get_choices_selected(self, arr_choices):
-        choices_selected = []
-        for choice_selected in arr_choices:
-            choices_selected.append(string_type(choice_selected[0]))
-        return choices_selected
-
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
         return self.get_prep_value(value)
 
     def validate(self, value, model_instance):
-        arr_choices = self.get_choices_selected(self.get_choices_default())
         for opt_select in value:
-            if (opt_select not in arr_choices):
-                if django.VERSION[0] == 1 and django.VERSION[1] >= 6:
+            if not self.valid_value(opt_select):
+                if django.VERSION[0] >= 1 and django.VERSION[1] >= 6:
                     raise exceptions.ValidationError(self.error_messages['invalid_choice'] % {"value": value})
                 else:
                     raise exceptions.ValidationError(self.error_messages['invalid_choice'] % value)
+
+    def valid_value(self, value):
+        "Check to see if the provided value is a valid choice"
+        text_value = force_text(value)
+        for k, v in self.get_choices_default():
+            if isinstance(v, (list, tuple)):
+                # This is an optgroup, so look inside the group for options
+                for k2, v2 in v:
+                    if value == k2 or text_value == force_text(k2):
+                        return True
+            else:
+                if value == k or text_value == force_text(k):
+                    return True
+        return False
 
     def get_default(self):
         default = super(MultiSelectField, self).get_default()
@@ -102,11 +111,20 @@ class MultiSelectField(models.CharField):
         return MultiSelectFormField(**defaults)
 
     def get_prep_value(self, value):
-        return '' if value is None else ",".join(value)
+        if value in ('', u'', None):
+            return value
+        return ",".join(map(str, value))
 
     def to_python(self, value):
-        if value:
-            return value if isinstance(value, list) else value.split(',')
+        if any([value is None, not value]):
+            return []  # FIXME: Needed for company, workaround
+        else:
+            if isinstance(value, set):
+                value = sorted(list(value))
+            value_list = value if isinstance(value, list) else value.split(',')
+            if self.value_type is not None:
+                value_list = map(self.value_type, value_list)
+            return value_list
 
     def contribute_to_class(self, cls, name):
         super(MultiSelectField, self).contribute_to_class(cls, name)
@@ -123,7 +141,9 @@ class MultiSelectField(models.CharField):
                                 item_display = choicedict.get(int(value), value)
                             except (ValueError, TypeError):
                                 item_display = value
-                        display.append(string_type(item_display))
+                        item_display = string_type(item_display)
+                        if item_display not in ('', u'', None):
+                            display.append(item_display)
                 return display
 
             def get_display(obj):

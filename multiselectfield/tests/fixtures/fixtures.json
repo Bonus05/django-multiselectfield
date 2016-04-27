@@ -1,0 +1,18 @@
+[
+    {
+        "fields": {
+            "value_type_multivaluefield": [1,2]
+        },
+        "model": "tests.testvaluetypemodel",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "multivaluefield": "1,2",
+            "blank_multivaluefield": "",
+            "null_multivaluefield": null
+        },
+        "model": "tests.testmodel",
+        "pk": 1
+    }
+]
